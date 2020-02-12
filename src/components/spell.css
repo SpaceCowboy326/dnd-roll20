@@ -1,0 +1,107 @@
+
+.spell-card .ant-card-head-title {
+    cursor: pointer;
+    font-weight: normal;
+    position: absolute;
+    transform: translate(-50%, 0);
+    transition: all 1s;
+}
+
+/*
+.spell-card.spell-card__collapsed .ant-card-head-wrapper {
+    text-align: center;
+}
+*/
+
+/* collapsed styles */
+.spell-card.spell-card__collapsed .ant-card-head-title {
+    left: 50%;
+}
+
+.spell-card.spell-card__collapsed .ant-card-extra {
+    opacity: 0;
+}
+
+.spell-card .ant-card-extra {
+    transition: all 2s;
+}
+
+.spell-card.spell-card__collapsed .ant-card-body {
+    height: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 1s;
+}
+
+.spell-card.spell-card__collapsed .spell-card-icons {
+    display: none;
+}
+
+.spell-card.spell-card__expanded .spell-card-icons {
+    display: block;
+}
+
+/* expanded styles */
+.spell-card.spell-card__expanded .ant-card-head-wrapper {
+    text-align: left;
+}
+
+.spell-card.spell-card__collapsed .ant-card-head-title {
+    top: 0;
+}
+
+.spell-card.spell-card__expanded .ant-card-head-title {
+    font-weight: 600;
+    transform: translate(0, 0);
+    left: 20px;
+};
+
+.spell-card.spell-card__expanded .ant-card-extra {
+    opacity: 0.8;
+    transition: all 2s;
+
+}
+
+.spell-card .ant-card-body .spell-card-description {
+    height: 171px;
+    padding: 12px;
+}
+
+.spell-card.spell-card__expanded .ant-card-body {
+    height: 171px;
+    opacity: 1;
+    overflow: hidden;
+    padding: 0;
+    transition: all 0.5s;
+}
+
+.spell-card-add-remove {
+    margin-right: 7px;
+}
+
+.spell-card-icon {
+    font-size: 16px;
+    margin-left: 20px;
+    transition: all 0.5s;
+}
+
+.spell-card-icon:hover {
+    transform: scale(1.2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .spell-card-icon--damage-type {
+      animation: spell-icon-spin infinite 2s linear;
+    }
+}
+  
+  @keyframes spell-icon-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+  }
+  
