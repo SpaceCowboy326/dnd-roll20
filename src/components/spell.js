@@ -62,6 +62,7 @@ export default function Spell(props) {
       force: "blue",
       lightning: "yellow",
       nature: "green",
+      necrotic: "purple",
       radiant: "gold",
     };
     const icon_color = DAMAGE_TYPE_COLOR_MAP[base_damage_type];
@@ -100,20 +101,33 @@ export default function Spell(props) {
       <Icon className="spell-card-add spell-card-add-remove" onClick={addSpell} type="read" style={{fontWeight: '700', fontSize: '16px'}} />;
     */
     const card_icon = <Icon className="spell-card-icon spell-card-icon--damage-type" type="heat-map" style={{color: icon_color}} />;
-
-    const total_damage_title = <Icon className="spell-card-icon" type="copy" onClick={copyToClipboard}></Icon>;
 //{add_remove_icon}
+    
+    let card_extra_damage_content = actual_damage ?
+    <div className="spell-card-extra--damage-content">
+      <Popover
+        placement="topLeft"
+        title={"Total Damage"}
+        content={actual_damage}
+        onClick={preventClose}
+        trigger="click"
+      >
+        <Icon className="spell-card-icon" type="border-outer" />
+      </Popover>
+      <Icon className="spell-card-icon" type="copy" onClick={copyToClipboard}></Icon>
+    </div>
+    : null;
+
     const card_extra_content = expanded ? <div className="spell-card-extra">
       <div className="spell-card-icons">
-        <Popover placement="topLeft" title={"Total Damage"} content={actual_damage} onClick={preventClose} trigger="click">
-          <Icon className="spell-card-icon" type="border-outer" />
-        </Popover>
-        {total_damage_title}
-        <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={base_damage_type} trigger="click">
+        {card_extra_damage_content}
+        <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={base_damage_type || "N/A"} trigger="click">
           {card_icon}
         </Popover>
       </div>
-    </div> : null;
+    </div>
+    : null;
+
     const main_content = <div className="spell-card-description">{spell.description}</div>;
 
     const spell_class_name = [
@@ -129,7 +143,6 @@ export default function Spell(props) {
           size="small"
           extra={card_extra_content}
       >
-        {actual_damage} { base_damage_type } damage.
         {main_content}
         <input type="hidden" ref={dice_copy_input} value={roll_command_text}/>
       </Card>

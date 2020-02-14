@@ -1,8 +1,23 @@
+come back here
+/*
+const spells_json_link = "spells.json";
+let spells;
+const fetchSpells = async () => {
+	const spells_json_response = await fetch(spells_json_link);
+	spells = await spells_json_response.json();
+
+};
+
+fetchSpells();
+*/
 const DIE_REGEX = /(\d+)d(\d+)/;
 const SLOT_EFFECT_REGEX = /increases by (\d+d\d+) for each slot level above (\d+)/;
 const PLAYER_LEVEL_EFFECT_REGEX = /(\d+\S+ level \(\d+d\d+\))+/g;
 const DECONSTRUCTED_LEVEL_EFFECT_REGEX = /^(\d+)\S+ level \((\d+d\d+)\)/;
 const BASE_DAMAGE_REGEX = /takes? (\d+d\d+) (\w+) damage/;
+
+
+
 
 /*
 async function getSpellsJson() {
@@ -203,6 +218,8 @@ const spell_logic = {
 	getSpellSlotLevelEffects: getSpellSlotLevelEffects,
 	getBaseDamageType: getBaseDamageType,
 	getBaseDamage: getBaseDamage,
+	setMeh: setMeh,
+	getMeh: getMeh,
 };
 
 export default spell_logic;

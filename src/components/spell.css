@@ -90,6 +90,10 @@
     transform: scale(1.2);
 }
 
+.spell-card-extra--damage-content {
+    display: inline-block;
+}
+
 @media (prefers-reduced-motion: no-preference) {
     .spell-card-icon--damage-type {
       animation: spell-icon-spin infinite 2s linear;
