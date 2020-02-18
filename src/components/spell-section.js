@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Slider, Divider, InputNumber, Row, Col, Typography, Icon, Switch } from 'antd';
+import { Slider, Input, Divider, InputNumber, Row, Col, Typography, Icon, Switch } from 'antd';
 import Spell from './spell';
 import SpellLogic from './spell-logic';
 
@@ -19,7 +19,8 @@ const slot_level_slider_marks = [...Array(9).keys()].reduce((marks, index) => {
 export default function SpellSection(props) {
     const[slotLevel, setSlotLevel] = useState(4);
     const[playerLevel, setPlayerLevel] = useState(5);
-    const[showKnownSpellsOnly, setShowKnownSpellsOnly] = useState(5);
+    const[showKnownSpellsOnly, setShowKnownSpellsOnly] = useState(false);
+    const[textFilter, setTextFilter] = useState("");
     const[spells, setSpells] = useState(null);
 
     const left_justify_column = {
@@ -30,6 +31,11 @@ export default function SpellSection(props) {
         const fetchSpells = async () => {
             const spells_json_response = await fetch(spells_json_link);
             const spells_json = await spells_json_response.json();
+            for (const spell_name in spells_json) {
+                // TODO: replace this with "initialize" function. Add properties not stored in the JSON.
+                spells_json[spell_name].name = spell_name;
+            }
+            console.log("initialized", spells_json);
             setSpells(spells_json);
         };
         fetchSpells();
@@ -45,10 +51,22 @@ export default function SpellSection(props) {
         setPlayerLevel(value);
     };
 
+    const onTextFilterChange = (e, value) => {
+        spell_list_refresh_required = true;
+        setTextFilter(value);
+    };
+
     const toggleShowKnownSpellsOnly = value => {
         spell_list_refresh_required = true;
         setShowKnownSpellsOnly(value);
         console.log(showKnownSpellsOnly);
+    }
+
+    function getFilterData() {
+        return [
+            {type: "boolean", prop: "known", value: showKnownSpellsOnly},
+            {type: "regex", value: textFilter},
+        ];
     }
 
     function getSpellContent() {
@@ -62,11 +80,15 @@ export default function SpellSection(props) {
             playerLevel: playerLevel,
             slotLevel: slotLevel
         };
+        const filter_data = getFilterData();
+console.log("filters", filter_data);
+
+        const filtered_spell_list = SpellLogic.filterSpellList({spells: spells, filters: filter_data});
         // reset the "updated" flag for player data since we are rgenerating the spell list
+        console.log("filtered", filtered_spell_list);
         spell_list_refresh_required = false;
-        return spells &&
-            Object.keys(spells).map((spell_name) => {
-                spells[spell_name].name = spell_name;
+        return filtered_spell_list &&
+            Object.keys(filtered_spell_list).map((spell_name) => {
                 const key = spell_name.replace(/ /g, '_').toLowerCase();
                 return <Col span={8} item="true" key={key}>
                         <Spell player_data={player_data} spell={spells[spell_name]} playerLevel={playerLevel} slotLevel={slotLevel}></Spell>
@@ -126,6 +148,11 @@ export default function SpellSection(props) {
                     />
                 </Col>
           </Row>
+            <Row type="flex" justify="start" align="middle" gutter={[30,0]}>
+                <Col style={left_justify_column}>
+                    <Input onChange={onTextFilterChange} placeholder="Filter spell name..."/>
+                </Col>
+            </Row>
           <Divider></Divider>
           <Row gutter={[16, 20]} >
             {spell_list}

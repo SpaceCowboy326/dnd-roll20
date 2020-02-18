@@ -12,14 +12,6 @@ export default function Spell(props) {
     const[added, setAdded] = useState(false);
     const dice_copy_input = useRef();
 
-
-    // const card_styles = {
-    //     cursor: "pointer",
-    //     //height: "45px",
-    //     transition: "all 3s ease .25s",
-    // };
-
-    // 
     const spell = props.spell;
 
 
@@ -33,10 +25,12 @@ export default function Spell(props) {
 
     function addSpell(e) {
       setAdded(true);
+      spell.known = true;
       e.stopPropagation();
     }
     function removeSpell(e) {
       setAdded(false);
+      spell.known = false;
       e.stopPropagation();
     }
 
@@ -94,14 +88,11 @@ export default function Spell(props) {
       e.stopPropagation();
     }
 
-    //skrrt
-    /*
     const add_remove_icon = added ?
-      <Icon className="spell-card-remove spell-card-add-remove" onClick={removeSpell} type="minus" style={{fontWeight: '700', fontSize: '16px', color: 'red'}} /> :
-      <Icon className="spell-card-add spell-card-add-remove" onClick={addSpell} type="read" style={{fontWeight: '700', fontSize: '16px'}} />;
-    */
-    const card_icon = <Icon className="spell-card-icon spell-card-icon--damage-type" type="heat-map" style={{color: icon_color}} />;
-//{add_remove_icon}
+      <Icon className="spell-card-icon" onClick={removeSpell} type="minus" style={{fontWeight: '700', fontSize: '16px', color: 'red'}} /> :
+      <Icon className="spell-card-icon" onClick={addSpell} type="read" style={{fontWeight: '700', fontSize: '16px'}} />;
+
+      const card_icon = <Icon className="spell-card-icon spell-card-icon--damage-type" type="heat-map" style={{color: icon_color}} />;
     
     let card_extra_damage_content = actual_damage ?
     <div className="spell-card-extra--damage-content">
@@ -120,6 +111,7 @@ export default function Spell(props) {
 
     const card_extra_content = expanded ? <div className="spell-card-extra">
       <div className="spell-card-icons">
+        {add_remove_icon}
         {card_extra_damage_content}
         <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={base_damage_type || "N/A"} trigger="click">
           {card_icon}

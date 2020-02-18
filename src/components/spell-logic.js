@@ -1,5 +1,3 @@
-come back here
-/*
 const spells_json_link = "spells.json";
 let spells;
 const fetchSpells = async () => {
@@ -9,7 +7,6 @@ const fetchSpells = async () => {
 };
 
 fetchSpells();
-*/
 const DIE_REGEX = /(\d+)d(\d+)/;
 const SLOT_EFFECT_REGEX = /increases by (\d+d\d+) for each slot level above (\d+)/;
 const PLAYER_LEVEL_EFFECT_REGEX = /(\d+\S+ level \(\d+d\d+\))+/g;
@@ -94,91 +91,6 @@ function getBaseDamage(base_damage_info) {
 	return base_damage_info[1];
 }
 
-/*
-function spellIncreasesAtLevels() {
-	Object.keys(spells_json).forEach(spell_name => {
-		const spell_description = spells_json[spell_name].description;
-		const player_level_effects = spell_description.match(PLAYER_LEVEL_EFFECT_REGEX);
-		if (player_level_effects) {
-			player_level_effects.some(level_effect => {
-				const deconstructed_level_effect = level_effect.match(DECONSTRUCTED_LEVEL_EFFECT_REGEX);
-				console.log("deconstructed effect", deconstructed_level_effect);
-			});
-		}
-	});
-};
-*/
-/*
-function evaluateSpells(current_player_level = 5, current_slot_level = 6) {
-	for(let spell_name in spells_json) {
-		console.log("Spell name:", spell_name);
-		console.log("Spell desc:", spells_json[spell_name].description);
-
-		const spell = spells_json[spell_name];
-		const slot_effects = getSpellSlotLevelEffects(spell);
-		if (slot_effects) {
-			const added_dice = calculateSlotLevelEffects(current_slot_level, slot_effects);
-			console.log("Going to add " + added_dice + " to your spell!");
-		}
-
-		const base_damage_info = getSpellBaseDamageInfo(spell);
-		if (base_damage_info) {
-			const base_damage = getBaseDamage(base_damage_info);
-			const base_damage_type = getBaseDamageType(base_damage_info);
-			console.log("Going to do " + base_damage + " " + base_damage_type + " damage!");
-		}
-
-		let player_level_effects = getSpellPlayerLevelEffects(spell);
-		if (player_level_effects) {
-			let added_dice = calculatePlayerLevelEffects(current_player_level, player_level_effects);
-			console.log("added dice from player level", added_dice);
-		}
-	}
-}
-*/
-/*
-function initializeSpellComponents() {
-	for(let spell_name in spells_json) {
-		const spell_container = document.getElementById("spell_container");
-		spell_container.appendChild(createSpellComponent(spell_name));
-	}
-}
-*/
-/*
-function createSpellComponent(spell_name) {
-	const spell_div = document.createElement('div');
-	spell_div.className = "dnd--spell-div";
-	spell_div.innerHTML = spell_name;
-	const spell = spells_json[spell_name];
-
-	let base_damage,
-		damage_type,
-		slot_level_effects,
-		player_level_effects;
-
-	const base_damage_info = getSpellBaseDamageInfo(spell);
-	if (base_damage_info) {
-		base_damage = getBaseDamage(base_damage_info);
-		damage_type = getBaseDamageType(base_damage_info);
-		//console.log("Going to do " + base_damage + " " + base_damage_type + " damage!");
-	}
-	player_level_effects = getSpellPlayerLevelEffects(spell);
-	slot_level_effects = getSpellSlotLevelEffects(spell);
-
-	const spell_args = {
-		base_damage: base_damage,
-		damage_type: damage_type,
-		slot_level_effects: slot_level_effects,
-		player_level_effects: player_level_effects,
-	};
-
-	spell_div.addEventListener("click", (e) => {
-		//logDamage(spell_args);
-		calculateDamage(spell_args);
-	});
-	return spell_div;
-}
-*/
 function calculateDamage(args) {
 	// console.log("args is?", args);
 	const base_damage = args.base_damage;
@@ -211,6 +123,41 @@ function calculateDamage(args) {
 	return final_actual_damage;
 }
 
+function checkFilters(spell, filters) {
+	return filters.every(filter => {
+		let passed = false;
+		console.log("checking spell", spell);
+		console.log("for filter", filter);
+		switch (filter.type) {
+			case "regex":
+				//TODO: allow specifying prop name for regex
+				passed = spell.description.match(filter.value) || spell.name.match(filter.value);
+				break;
+			case "boolean":
+				passed = !filter.value || spell[filter.prop] === filter.value;
+				break;
+			default:
+				console.warn("Unknown filter type:", filter.type);
+				break;
+		}
+		return passed;
+	});
+}
+
+function filterSpellList({spells = null, filters = []}) {
+	//const filter_properties = Object.keys(filters).filter(filter_name => filters[filter_name]);
+	if (!spells) { return null; }
+	if (Object.keys(filters).length === 0) { return spells };
+	return Object.keys(spells).reduce((filtered_spells, spell_name) => {
+		const spell = spells[spell_name];
+		if (checkFilters(spell, filters)) {
+			console.log("passed filters", spell);
+			filtered_spells[spell_name] = spell;
+		}
+		return filtered_spells;
+	}, {});
+}
+
 const spell_logic = {
 	calculateDamage: calculateDamage,
 	getSpellBaseDamageInfo: getSpellBaseDamageInfo,
@@ -218,8 +165,7 @@ const spell_logic = {
 	getSpellSlotLevelEffects: getSpellSlotLevelEffects,
 	getBaseDamageType: getBaseDamageType,
 	getBaseDamage: getBaseDamage,
-	setMeh: setMeh,
-	getMeh: getMeh,
+	filterSpellList: filterSpellList,
 };
 
 export default spell_logic;
