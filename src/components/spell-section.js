@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Slider, Input, Divider, InputNumber, Row, Col, Typography, Icon, Switch } from 'antd';
 import Spell from './spell';
 import SpellLogic from './spell-logic';
+import spell_book from '../assets/images/spell_book.png'
 
 const spells_json_link = "spells.json";
 let spell_list;
@@ -51,8 +52,9 @@ export default function SpellSection(props) {
         setPlayerLevel(value);
     };
 
-    const onTextFilterChange = (e, value) => {
+    const onTextFilterChange = ({ target: { value } }) => {
         spell_list_refresh_required = true;
+        console.log("text val is", value);
         setTextFilter(value);
     };
 
@@ -64,8 +66,8 @@ export default function SpellSection(props) {
 
     function getFilterData() {
         return [
-            {type: "boolean", prop: "known", value: showKnownSpellsOnly},
-            {type: "regex", value: textFilter},
+            {type: "boolean", props: "known", value: showKnownSpellsOnly},
+            {type: "regex", props: ["description", "name"], value: textFilter},
         ];
     }
 
@@ -105,7 +107,7 @@ console.log("filters", filter_data);
 
     return (
         <div style={container_styles}>
-            <Icon type="read" style={{fontSize: "60px"}}/>
+            <img src={spell_book} alt="SPELLZ" />
             <Row type="flex" justify="start">
                 <Col style={left_justify_column} span={3}>
                     <span>Character Level</span>

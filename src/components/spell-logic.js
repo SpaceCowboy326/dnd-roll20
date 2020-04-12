@@ -1,3 +1,5 @@
+import { OmitProps } from "antd/lib/transfer/renderListBody";
+
 const spells_json_link = "spells.json";
 let spells;
 const fetchSpells = async () => {
@@ -123,6 +125,118 @@ function calculateDamage(args) {
 	return final_actual_damage;
 }
 
+const FILTER_TYPES = {
+	REGEX: "regex",
+	BOOLEAN: "boolean",
+};
+
+class SpellFilter {
+	constructor({type, value, props}) {
+		this._type = type;
+		this._value = value;
+		if (!Array.isArray(props)) {
+			props = [props];
+		}
+		this._props = props;
+	}
+
+
+	static filter(item) {
+		return this.filter(item);
+	}
+
+	set value(value) {
+		this._value = value;
+	}
+
+	set props(props) {
+		this._props = props;
+	}
+}
+
+class BooleanFilter extends SpellFilter {
+
+	constructor({value, props}) {
+		super({
+			props: props,
+			type: FILTER_TYPES.BOOLEAN,
+			value: value,
+		});
+	}
+
+	filter(item) {
+		const value = this._value;
+		this._props.some(prop => !!item[ prop ] === value);
+	}
+}
+
+
+class RegexFilter extends SpellFilter {
+
+	constructor({value, props}) {
+		super({
+			props: props,
+			type: FILTER_TYPES.REGEX,
+			value: value,
+		});
+	}
+
+	filter(item) {
+		const item_value = item[ this._prop ] || "";
+		const filter_value = this.value;
+		console.log("Does", item_value);
+		console.log("Match with", this._value);
+		return this._props.some(prop => item_value.match(filter_value));
+	}
+}
+
+
+function createSpellFilters(filters_args) {
+	console.log("deez my argaments", filters_args);
+	return filters_args.map((filter_args) => FILTER_GENERATOR[filter_args.type] && FILTER_GENERATOR[filter_args.type](filter_args));
+}
+
+const FILTER_GENERATOR = {
+	boolean: (args) => new BooleanFilter(args),
+	regex: (args) => new RegexFilter(args),
+}
+
+
+
+function filterSpellList({spells = null, filters = []}) {
+
+	//const filter_properties = Object.keys(filters).filter(filter_name => filters[filter_name]);
+	if (!spells) { return null; }
+	if (!filters || filters.length === 0) { return spells };
+	const spell_filters = createSpellFilters(filters);
+	console.log("Look i made these", spell_filters);
+	return Object.keys(spells).reduce((filtered_spells, spell_name) => {
+		const spell = spells[spell_name];
+		const passed = spell_filters.every(filter => filter.filter(spell));
+		if (passed) {	
+			console.log("passed filters", spell);
+			filtered_spells[spell_name] = spell;
+		}
+		else {
+			//console.log("no dice for", spell);
+		}
+
+		return filtered_spells;
+	}, {});
+	/*
+	const filtered_spells = Object.keys(spells).reduce((filtered_spells, spell_name) => {
+		const spell = spells[spell_name];
+		if (true) {	
+			console.log("passed filters", spell);
+			filtered_spells[spell_name] = spell;
+		}
+		return filtered_spells;
+	}, {});
+	*/
+
+}
+
+/*
 function checkFilters(spell, filters) {
 	return filters.every(filter => {
 		let passed = false;
@@ -134,6 +248,9 @@ function checkFilters(spell, filters) {
 				passed = spell.description.match(filter.value) || spell.name.match(filter.value);
 				break;
 			case "boolean":
+				passed = spell[filter.prop] === filter.value;
+				break;
+			case "conditional":
 				passed = !filter.value || spell[filter.prop] === filter.value;
 				break;
 			default:
@@ -143,20 +260,8 @@ function checkFilters(spell, filters) {
 		return passed;
 	});
 }
+*/
 
-function filterSpellList({spells = null, filters = []}) {
-	//const filter_properties = Object.keys(filters).filter(filter_name => filters[filter_name]);
-	if (!spells) { return null; }
-	if (Object.keys(filters).length === 0) { return spells };
-	return Object.keys(spells).reduce((filtered_spells, spell_name) => {
-		const spell = spells[spell_name];
-		if (checkFilters(spell, filters)) {
-			console.log("passed filters", spell);
-			filtered_spells[spell_name] = spell;
-		}
-		return filtered_spells;
-	}, {});
-}
 
 const spell_logic = {
 	calculateDamage: calculateDamage,
