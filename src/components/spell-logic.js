@@ -155,7 +155,6 @@ class SpellFilter {
 }
 
 class BooleanFilter extends SpellFilter {
-
 	constructor({value, props}) {
 		super({
 			props: props,
@@ -165,14 +164,12 @@ class BooleanFilter extends SpellFilter {
 	}
 
 	filter(item) {
-		const value = this._value;
-		this._props.some(prop => !!item[ prop ] === value);
+		const filter_value = this._value;
+		return this._props.some(prop => !!item[ prop ] === filter_value);
 	}
 }
 
-
 class RegexFilter extends SpellFilter {
-
 	constructor({value, props}) {
 		super({
 			props: props,
@@ -182,17 +179,13 @@ class RegexFilter extends SpellFilter {
 	}
 
 	filter(item) {
-		const item_value = item[ this._prop ] || "";
-		const filter_value = this.value;
-		console.log("Does", item_value);
-		console.log("Match with", this._value);
-		return this._props.some(prop => item_value.match(filter_value));
+		const filter_value = this._value;
+		return this._props.some(prop => item[prop].match(filter_value));
 	}
 }
 
 
 function createSpellFilters(filters_args) {
-	console.log("deez my argaments", filters_args);
 	return filters_args.map((filter_args) => FILTER_GENERATOR[filter_args.type] && FILTER_GENERATOR[filter_args.type](filter_args));
 }
 
@@ -209,59 +202,20 @@ function filterSpellList({spells = null, filters = []}) {
 	if (!spells) { return null; }
 	if (!filters || filters.length === 0) { return spells };
 	const spell_filters = createSpellFilters(filters);
-	console.log("Look i made these", spell_filters);
 	return Object.keys(spells).reduce((filtered_spells, spell_name) => {
 		const spell = spells[spell_name];
-		const passed = spell_filters.every(filter => filter.filter(spell));
+		// const passed = spell_filters.every(filter => filter.filter(spell));
+		const passed = spell_filters.every(filter => {
+			let pass = filter.filter(spell);
+			return pass;
+		});
 		if (passed) {	
-			console.log("passed filters", spell);
 			filtered_spells[spell_name] = spell;
-		}
-		else {
-			//console.log("no dice for", spell);
 		}
 
 		return filtered_spells;
 	}, {});
-	/*
-	const filtered_spells = Object.keys(spells).reduce((filtered_spells, spell_name) => {
-		const spell = spells[spell_name];
-		if (true) {	
-			console.log("passed filters", spell);
-			filtered_spells[spell_name] = spell;
-		}
-		return filtered_spells;
-	}, {});
-	*/
-
 }
-
-/*
-function checkFilters(spell, filters) {
-	return filters.every(filter => {
-		let passed = false;
-		console.log("checking spell", spell);
-		console.log("for filter", filter);
-		switch (filter.type) {
-			case "regex":
-				//TODO: allow specifying prop name for regex
-				passed = spell.description.match(filter.value) || spell.name.match(filter.value);
-				break;
-			case "boolean":
-				passed = spell[filter.prop] === filter.value;
-				break;
-			case "conditional":
-				passed = !filter.value || spell[filter.prop] === filter.value;
-				break;
-			default:
-				console.warn("Unknown filter type:", filter.type);
-				break;
-		}
-		return passed;
-	});
-}
-*/
-
 
 const spell_logic = {
 	calculateDamage: calculateDamage,
