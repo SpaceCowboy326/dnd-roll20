@@ -4,6 +4,16 @@ import { Slider, Input, Divider, InputNumber, Row, Col, Typography, Icon, Switch
 import Spell from './spell';
 import SpellLogic from './spell-logic';
 import spell_book from '../assets/images/spell_book.png'
+import IconSelector from './inputs/icon-selector';
+
+//https://stackoverflow.com/questions/53762640/how-to-import-all-images-from-a-folder-in-reactjs/53762705
+function importAll(r) {
+    return r.keys().map(r);
+  }
+  
+const spell_sprites = importAll(require.context('../assets/images', false, /spell_sprites_\d+\.(png)$/));
+
+const SPRITE_DIMENSION = 128;
 
 const spells_json_link = "spells.json";
 let spell_list;
@@ -104,6 +114,7 @@ export default function SpellSection(props) {
     return (
         <div style={container_styles}>
             <img src={spell_book} alt="SPELLZ" />
+            <IconSelector isVisible={true}></IconSelector>
             <Row type="flex" justify="start">
                 <Col style={left_justify_column} span={3}>
                     <span>Character Level</span>
@@ -146,13 +157,13 @@ export default function SpellSection(props) {
                     />
                 </Col>
           </Row>
-            <Row type="flex" justify="start" align="middle" gutter={[30,0]}>
+            <Row justify="start" align="middle" gutter={[30,0]}>
                 <Col style={left_justify_column}>
                     <Input onChange={onTextFilterChange} placeholder="Search..."/>
                 </Col>
             </Row>
           <Divider></Divider>
-          <Row gutter={[16, 20]} >
+          <Row align="top" type="flex" gutter={[16, 20]} >
             {spell_list}
           </Row>
         </div>

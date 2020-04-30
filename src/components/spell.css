@@ -94,18 +94,40 @@
     display: inline-block;
 }
 
+.icon-container {
+    display: inline-block;
+    /* transform: scale(0.25); */
+}
+
+.icon-selector-icon {
+    background-repeat: no-repeat;
+    /* background-size: 128px; */
+    display: inline-block;
+    height: 32px;
+    transition: all 0.5s;
+    width: 32px;
+}
+
+.icon-selector-icon.selected_icon {
+    border: 5px solid red;
+    margin: -16px 0 0 -16px;
+    height: 64px;
+    width: 64px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
     .spell-card-icon--damage-type {
       animation: spell-icon-spin infinite 2s linear;
     }
 }
   
-  @keyframes spell-icon-spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-  }
-  
+@keyframes spell-icon-spin {
+0% {
+    transform: rotate(0deg);
+}
+100% {
+    transform: rotate(360deg);
+}
+}
+
+

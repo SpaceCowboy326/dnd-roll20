@@ -179,7 +179,7 @@ class RegexFilter extends SpellFilter {
 	}
 
 	filter(item) {
-		const filter_value = this._value;
+		const filter_value = new RegExp(this._value, 'i');
 		return this._props.some(prop => item[prop].match(filter_value));
 	}
 }

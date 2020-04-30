@@ -9,7 +9,8 @@ import SpellLogic from './spell-logic';
 
 export default function Spell(props) {
     const[expanded, setExpanded] = useState(false);
-    const[added, setAdded] = useState(false);
+    // check the spell to see if it is already known
+    const[added, setAdded] = useState((props.spell && props.spell.known) || false);
     const dice_copy_input = useRef();
 
     const spell = props.spell;
