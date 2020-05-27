@@ -2,6 +2,7 @@
 .spell-card .ant-card-head-title {
     cursor: pointer;
     font-weight: normal;
+    padding: 6px 0 !important;
     position: absolute;
     transform: translate(-50%, 0);
     transition: all 1s;
@@ -27,11 +28,15 @@
 }
 
 .spell-card.spell-card__collapsed .ant-card-body {
-    height: 0;
+    max-height: 0;
     padding: 0;
     opacity: 0;
     overflow: hidden;
     transition: all 1s;
+}
+
+.spell-card.spell-card__expanded .ant-card-body {
+    max-height: 2000px;
 }
 
 .spell-card.spell-card__collapsed .spell-card-icons {
@@ -64,12 +69,12 @@
 }
 
 .spell-card .ant-card-body .spell-card-description {
-    height: 171px;
-    padding: 12px;
+    /* height: 171px; */
+    /* padding: 12px; */
 }
 
 .spell-card.spell-card__expanded .ant-card-body {
-    height: 171px;
+    /* height: 171px; */
     opacity: 1;
     overflow: hidden;
     padding: 0;
@@ -94,6 +99,12 @@
     display: inline-block;
 }
 
+.spell-icon-img {
+    height: 24px;
+    margin-right: 10px;
+    width: 24px;
+}
+
 .icon-container {
     display: inline-block;
     /* transform: scale(0.25); */
@@ -108,8 +119,15 @@
     width: 32px;
 }
 
+.icon-selector-icon:hover {
+    transform: scale(1.25);
+}
+
 .icon-selector-icon.selected_icon {
-    border: 5px solid red;
+    animation: selected-icon infinite 4s linear;
+    border-radius: 10px;
+    /* border: 5px solid red; */
+    /* box-shadow: 0 0 20px 5px blue; */
     margin: -16px 0 0 -16px;
     height: 64px;
     width: 64px;
@@ -122,12 +140,32 @@
 }
   
 @keyframes spell-icon-spin {
-0% {
-    transform: rotate(0deg);
-}
-100% {
-    transform: rotate(360deg);
-}
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 
+@keyframes selected-icon {
+    0% {
+        transform: rotate(0);
+    }
+    25% {
+        transform: rotate(5deg);
+        box-shadow: 0 0 20px 5px blue;
+
+    }
+    50% {
+        transform: rotate(0);
+    }
+    75% {
+        transform: rotate(-5deg);
+        box-shadow: 0 0 20px 5px teal;
+    }
+    100% {
+        transform: rotate(0);
+    }
+}

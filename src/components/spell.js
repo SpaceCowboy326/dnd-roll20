@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 
-import { Card, Icon, Popover } from 'antd';
-
+import { Card, Collapse, Icon, Popover, Typography } from 'antd';
 import './spell.css';
 import SpellLogic from './spell-logic';
 
+const { Panel } = Collapse;
+const { Text } = Typography;
 
 
 export default function Spell(props) {
@@ -12,13 +13,10 @@ export default function Spell(props) {
     // check the spell to see if it is already known
     const[added, setAdded] = useState((props.spell && props.spell.known) || false);
     const dice_copy_input = useRef();
-
     const spell = props.spell;
-
 
 //useEffect(() => console.log("Props player is", props.playerLevel), [props.playerLevel]);
 //useEffect(() => console.log("Props slot is", props.slotLevel), [props.slotLevel]);
-
 
     function toggleExpanded() {
       setExpanded(!expanded);
@@ -61,9 +59,6 @@ export default function Spell(props) {
       radiant: "gold",
     };
     const icon_color = DAMAGE_TYPE_COLOR_MAP[base_damage_type];
-
-
-
     const slot_level_effects = SpellLogic.getSpellSlotLevelEffects(spell);
     const player_level_effects = SpellLogic.getSpellPlayerLevelEffects(spell);
 
@@ -93,35 +88,87 @@ export default function Spell(props) {
       <Icon className="spell-card-icon" onClick={removeSpell} type="minus" style={{fontWeight: '700', fontSize: '16px', color: 'red'}} /> :
       <Icon className="spell-card-icon" onClick={addSpell} type="read" style={{fontWeight: '700', fontSize: '16px'}} />;
 
-      const card_icon = <Icon className="spell-card-icon spell-card-icon--damage-type" type="heat-map" style={{color: icon_color}} />;
-    
-    let card_extra_damage_content = actual_damage ?
-    <div className="spell-card-extra--damage-content">
-      <Popover
-        placement="topLeft"
-        title={"Total Damage"}
-        content={actual_damage}
-        onClick={preventClose}
-        trigger="click"
-      >
-        <Icon className="spell-card-icon" type="border-outer" />
-      </Popover>
-      <Icon className="spell-card-icon" type="copy" onClick={copyToClipboard}></Icon>
-    </div>
-    : null;
+    const card_icon = <Icon className="spell-card-icon spell-card-icon--damage-type" type="heat-map" style={{color: icon_color}} />;
 
+    const select_icon = <Icon type="file-jpg" onClick={(e) => {props.setIconSelectionSpell(spell);e.stopPropagation();}} />
+    let spell_icon_img = null;
+    if (spell.icon) {
+      spell_icon_img = <img className="spell-icon-img" alt="icon" src={spell.icon}></img>
+    }
+
+    const title_html = <div>{spell_icon_img} <span>{spell.name}</span></div>
+
+    let card_extra_damage_content = actual_damage ?
+      <div className="spell-card-extra--damage-content">
+        <Popover
+          placement="topLeft"
+          title={"Total Damage"}
+          content={actual_damage}
+          onClick={preventClose}
+          trigger="click"
+        >
+          <Icon className="spell-card-icon" type="border-outer" />
+        </Popover>
+        <Icon className="spell-card-icon" type="copy" onClick={copyToClipboard}></Icon>
+      </div>
+      : null;
+
+    const damage_type_display = <span style={{textTransform: "capitalize"}}>{ base_damage_type || "N/A"}</span>
     const card_extra_content = expanded ? <div className="spell-card-extra">
       <div className="spell-card-icons">
+        {select_icon}
         {add_remove_icon}
         {card_extra_damage_content}
-        <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={base_damage_type || "N/A"} trigger="click">
+        {/* <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={base_damage_type || "N/A"} trigger="click"> */}
+        <Popover placement="topLeft" title={"Damage Type"} onClick={preventClose} content={damage_type_display} trigger="click">
           {card_icon}
         </Popover>
       </div>
     </div>
     : null;
 
-    const main_content = <div className="spell-card-description">{spell.description}</div>;
+    const grid_container_styles = {
+      display: "grid",
+      fontSize: "14px",
+      gridTemplateColumns: "1fr 2fr",
+    };
+    const grid_value_styles = {
+      paddingLeft: "10px",
+      textAlign: "left",
+    };
+    const grid_label_styles = {
+      paddingLeft: "15px",
+      textAlign: "right",
+    };
+
+    const main_content = 
+      <div className="spell-card-description" onClick={preventClose}>
+        <Collapse defaultActiveKey={['1']}>
+          <Panel header="Requirements" key="1">
+            <div style={grid_container_styles}>
+              <div style={grid_label_styles}><Text strong>Spell Level:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.level}</Text></div>
+              <div style={grid_label_styles}><Text strong>Components:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.components}</Text></div>
+              <div style={grid_label_styles}><Text strong>Casting Time:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.casting_time}</Text></div>
+            </div>
+          </Panel>
+          <Panel header="General" key="2">
+            <div style={grid_container_styles}>
+              <div style={grid_label_styles}><Text strong>School:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.school}</Text></div>
+              <div style={grid_label_styles}><Text strong>Range:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.range}</Text></div>
+              <div style={grid_label_styles}><Text strong>Duration:</Text></div>
+              <div style={grid_value_styles}><Text>{spell.duration}</Text></div>
+            </div>
+          </Panel>
+          <Panel header="Description" key="3">
+            {spell.description}
+          </Panel>
+        </Collapse>
+      </div>;
 
     const spell_class_name = [
         "spell-card",
@@ -132,7 +179,8 @@ export default function Spell(props) {
       <Card
           className={spell_class_name}
           onClick={toggleExpanded}
-          title={spell.name}
+          // title={ spell.name }
+          title={title_html}
           size="small"
           extra={card_extra_content}
       >

@@ -1,38 +1,18 @@
-import { OmitProps } from "antd/lib/transfer/renderListBody";
-
-const spells_json_link = "spells.json";
-let spells;
-const fetchSpells = async () => {
-	const spells_json_response = await fetch(spells_json_link);
-	spells = await spells_json_response.json();
-
-};
-
-fetchSpells();
 const DIE_REGEX = /(\d+)d(\d+)/;
 const SLOT_EFFECT_REGEX = /increases by (\d+d\d+) for each slot level above (\d+)/;
 const PLAYER_LEVEL_EFFECT_REGEX = /(\d+\S+ level \(\d+d\d+\))+/g;
 const DECONSTRUCTED_LEVEL_EFFECT_REGEX = /^(\d+)\S+ level \((\d+d\d+)\)/;
 const BASE_DAMAGE_REGEX = /takes? (\d+d\d+) (\w+) damage/;
 
-
-
-
-/*
-async function getSpellsJson() {
-    const spells_json_link = "spells.json";
-    const spells_json_response = await fetch(spells_json_link);
-    const spells_json = await spells_json_response.json();
-    window.spells_json = spells_json;
-    return spells_json
+function importAll(r) {
+    return r.keys().map(r);
+}
+//const spell_sprites = importAll(require.context('../../assets/images', false, /spell_sprites_\d+\.png$/));
+const spell_sprites = importAll(require.context('../assets/images', true, /SpellBook\d+_\d+\.(png|PNG)$/));
+function getSpellSprites() {
+	return spell_sprites;
 }
 
-let spells_json;
-getSpellsJson().then(resp => {
-	spells_json = resp;
-	initializeSpellComponents();
-});
-*/
 // determine the effects a spell has if a player uses a spell at a level above its natural level, if any
 function getSpellSlotLevelEffects(spell) {
 	return spell.description.match(SLOT_EFFECT_REGEX);
@@ -184,7 +164,6 @@ class RegexFilter extends SpellFilter {
 	}
 }
 
-
 function createSpellFilters(filters_args) {
 	return filters_args.map((filter_args) => FILTER_GENERATOR[filter_args.type] && FILTER_GENERATOR[filter_args.type](filter_args));
 }
@@ -194,27 +173,57 @@ const FILTER_GENERATOR = {
 	regex: (args) => new RegexFilter(args),
 }
 
-
-
 function filterSpellList({spells = null, filters = []}) {
-
 	//const filter_properties = Object.keys(filters).filter(filter_name => filters[filter_name]);
 	if (!spells) { return null; }
 	if (!filters || filters.length === 0) { return spells };
 	const spell_filters = createSpellFilters(filters);
 	return Object.keys(spells).reduce((filtered_spells, spell_name) => {
 		const spell = spells[spell_name];
-		// const passed = spell_filters.every(filter => filter.filter(spell));
-		const passed = spell_filters.every(filter => {
-			let pass = filter.filter(spell);
-			return pass;
-		});
+		const passed = spell_filters.every(filter => filter.filter(spell));
 		if (passed) {	
 			filtered_spells[spell_name] = spell;
 		}
 
 		return filtered_spells;
 	}, {});
+}
+
+function extractSpellIconName(icon_url) {
+	const icon_name_match = icon_url.match(/\/static\/media\/(SpellBook\d+\_\d+)\./);
+	return icon_name_match[1];
+}
+
+function findSpellIconUrl(icon_name) {
+	return spell_sprites.find(sprite => extractSpellIconName(sprite) === icon_name);
+}
+
+function initializeSpellIcons(spells) {
+	Object.keys(spells).forEach(spell_key => {
+		if (spells[spell_key].icon_name) {
+			spells[spell_key].icon = findSpellIconUrl(spells[spell_key].icon_name);
+		}
+		//"/static/media/SpellBook01_39.e761070b.png"
+	});
+}
+
+function outputSpellJson(spells) {
+	let formatted_output = {};
+	Object.keys(spells).forEach(spell_key => {
+		const spell = spells[ spell_key ];
+		const output_obj = {
+			casting_time: spell.casting_time,
+			components: spell.components,
+			duration: spell.duration,
+			description: spell.description,
+			level: spell.level,
+			range: spell.range,
+			school: spell.school,
+			icon_name: spell.icon_name,
+		};
+		formatted_output[ spell.name ] = output_obj;
+	});
+	console.log(JSON.stringify(formatted_output));
 }
 
 const spell_logic = {
@@ -225,6 +234,9 @@ const spell_logic = {
 	getBaseDamageType: getBaseDamageType,
 	getBaseDamage: getBaseDamage,
 	filterSpellList: filterSpellList,
+	getSpellSprites: getSpellSprites,
+	initializeSpellIcons: initializeSpellIcons,
+	outputSpellJson: outputSpellJson,
 };
 
 export default spell_logic;

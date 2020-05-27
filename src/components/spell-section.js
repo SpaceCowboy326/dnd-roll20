@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-import { Slider, Input, Divider, InputNumber, Row, Col, Typography, Icon, Switch } from 'antd';
+import { Slider, Input, Divider, InputNumber, Row, Col, Typography, Switch, Button } from 'antd';
 import Spell from './spell';
 import SpellLogic from './spell-logic';
-import spell_book from '../assets/images/spell_book.png'
+//import spell_book from '../assets/images/spell_book.png'
 import IconSelector from './inputs/icon-selector';
 
-//https://stackoverflow.com/questions/53762640/how-to-import-all-images-from-a-folder-in-reactjs/53762705
-function importAll(r) {
-    return r.keys().map(r);
-  }
-  
-const spell_sprites = importAll(require.context('../assets/images', false, /spell_sprites_\d+\.(png)$/));
-
-const SPRITE_DIMENSION = 128;
-
 const spells_json_link = "spells.json";
+const { Title } = Typography;
 let spell_list;
 let spell_list_refresh_required;
 
@@ -33,7 +25,7 @@ export default function SpellSection(props) {
     const[showKnownSpellsOnly, setShowKnownSpellsOnly] = useState(false);
     const[textFilter, setTextFilter] = useState("");
     const[spells, setSpells] = useState(null);
-
+    const[iconSelectionSpell, setIconSelectionSpell] = useState(null);
     const left_justify_column = {
         textAlign: "left",
     };
@@ -46,11 +38,14 @@ export default function SpellSection(props) {
                 // TODO: replace this with "initialize" function. Add properties not stored in the JSON.
                 spells_json[spell_name].name = spell_name;
             }
+            SpellLogic.initializeSpellIcons(spells_json);
             console.log("initialized", spells_json);
             setSpells(spells_json);
         };
         fetchSpells();
     }, []);
+
+    console.log("Rendering Spell Section");
 
     const onSlotLevelChange = value => {
         spell_list_refresh_required = true;
@@ -70,7 +65,6 @@ export default function SpellSection(props) {
     const toggleShowKnownSpellsOnly = value => {
         spell_list_refresh_required = true;
         setShowKnownSpellsOnly(value);
-        console.log(showKnownSpellsOnly);
     }
 
     function getFilterData() {
@@ -84,7 +78,7 @@ export default function SpellSection(props) {
         // return a cached version of the spell list if the player data hasn't been updated since
         // we last rendered
         if (spell_list && !spell_list_refresh_required) {
-            return spell_list;
+       //     return spell_list;
         }
 
         const player_data = {
@@ -99,7 +93,8 @@ export default function SpellSection(props) {
             Object.keys(filtered_spell_list).map((spell_name) => {
                 const key = spell_name.replace(/ /g, '_').toLowerCase();
                 return <Col span={8} item="true" key={key}>
-                        <Spell player_data={player_data} spell={spells[spell_name]} playerLevel={playerLevel} slotLevel={slotLevel}></Spell>
+                        {/* <Spell player_data={player_data} openIconModal={openIconModal} spell={spells[spell_name]} playerLevel={playerLevel} slotLevel={slotLevel}></Spell> */}
+                        <Spell player_data={player_data} setIconSelectionSpell={setIconSelectionSpell} spell={spells[spell_name]} playerLevel={playerLevel} slotLevel={slotLevel}></Spell>
                     </Col>;
             });
     }
@@ -113,13 +108,13 @@ export default function SpellSection(props) {
 
     return (
         <div style={container_styles}>
-            <img src={spell_book} alt="SPELLZ" />
-            <IconSelector isVisible={true}></IconSelector>
-            <Row type="flex" justify="start">
-                <Col style={left_justify_column} span={3}>
+            <Title level={2}>DnD Spellbook</Title>
+            {/* <img src={spell_book} alt="SPELLZ" /> */}
+            <Row type="flex" justify="start" gutter={10, 10}>
+                <Col style={left_justify_column}>
                     <span>Character Level</span>
                 </Col>
-                <Col style={left_justify_column} span={3}>
+                <Col style={left_justify_column}>
                     <InputNumber
                         min={1}
                         max={20}
@@ -127,7 +122,7 @@ export default function SpellSection(props) {
                         value={playerLevel}
                     />
                 </Col>
-                <Col style={left_justify_column} span={2}>
+                <Col style={left_justify_column}>
                     <span>Known Spells Only</span>
                 </Col>
                 <Col style={left_justify_column} span={3}>
@@ -156,6 +151,8 @@ export default function SpellSection(props) {
                         onChange={onSlotLevelChange}
                     />
                 </Col>
+                <Col><Button onClick={()=>SpellLogic.outputSpellJson(spells)}>Output</Button></Col>
+
           </Row>
             <Row justify="start" align="middle" gutter={[30,0]}>
                 <Col style={left_justify_column}>
@@ -166,6 +163,7 @@ export default function SpellSection(props) {
           <Row align="top" type="flex" gutter={[16, 20]} >
             {spell_list}
           </Row>
+          <IconSelector spell={iconSelectionSpell} setIconSelectionSpell={setIconSelectionSpell}></IconSelector>
         </div>
     );
 }
